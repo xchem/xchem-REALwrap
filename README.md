@@ -67,27 +67,28 @@ realwrap-prepare-syndirella syndirella_auto.csv --api-key YOUR_KEY -o manual.csv
 
 ## Development
 
-Create an isolated virtual environment before installing in editable mode:
+This project uses [uv](https://docs.astral.sh/uv/) to create the virtual environment and install
+dependencies, matching the tooling used in CI (see [.github/workflows/tests.yaml](.github/workflows/tests.yaml)
+and [.github/workflows/release.yaml](.github/workflows/release.yaml)).
+
+Install `uv` if you don't already have it (see the
+[uv installation guide](https://docs.astral.sh/uv/getting-started/installation/) for other methods):
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
+pip install uv
 ```
 
-If `python3 -m venv` fails with an `ensurepip is not available` error (common on minimal
-Debian/Ubuntu images without the `python3-venv` apt package), use `virtualenv` instead, which
-doesn't depend on `ensurepip`:
+Create an isolated virtual environment, then install the package with its dev/test dependencies:
 
 ```bash
-pip install virtualenv
-python3 -m virtualenv .venv
+uv venv .venv
 source .venv/bin/activate
+uv pip install -e ".[dev]"
 ```
 
-Then install the package with its dev/test dependencies and run the test suite:
+Run the test suite:
 
 ```bash
-pip install -e ".[dev]"
 pytest tests/
 ```
 
