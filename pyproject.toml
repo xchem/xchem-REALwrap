@@ -1,0 +1,56 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "REALwrap"
+version = "0.1.0"
+description = "A Python client and CLI toolkit for the Enamine REAL Tools API"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [
+    { name = "Warren Thompson" },
+]
+dependencies = [
+    "requests>=2.25",
+    "ratelimit>=2.2.1",
+    "pandas>=1.3",
+    "numpy>=1.20",
+    "rdkit>=2023.3.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/xchem/xchem-REALwrap"
+Issues = "https://github.com/xchem/xchem-REALwrap/issues"
+
+[project.scripts]
+realwrap-fetch = "realwrap.core:main"
+realwrap-extract-bbs = "realwrap.extract_building_blocks:main"
+realwrap-prepare-syndirella = "realwrap.prepare_syndirella_input:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/realwrap"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"src/realwrap/data/enamine-real-tools-rxns.csv" = "realwrap/data/enamine-real-tools-rxns.csv"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/realwrap",
+    "tests",
+    "README.md",
+    "LICENSE",
+]
+
+[tool.pytest.ini_options]
+# test_smirks_regression.py is a standalone diagnostic script (run directly via
+# `python tests/test_smirks_regression.py`) that relies on external processed CSVs
+# not shipped in this repo. Its test_row()/test_file() helpers are not pytest tests,
+# so it's excluded from collection to avoid false fixture-not-found errors.
+addopts = "--ignore=tests/test_smirks_regression.py"

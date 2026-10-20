@@ -1,0 +1,83 @@
+# The standard xchem Python package release process.
+# Run on 'Release' and published to PyPI as a 'trusted' publisher.
+#
+# See https://docs.pypi.org/trusted-publishers/creating-a-project-through-oidc/
+# See https://packaging.python.org/en/latest/guides/publishing-package-distribution-releases-using-github-actions-ci-cd-workflows/
+#
+# NOTE: tag/release names must be a bare PEP 440 version (e.g. "0.2.0"),
+# not prefixed with "v", since it is passed directly to `uv version`.
+name: Release
+
+on:
+  release:
+    types:
+    - published
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v6
+      with:
+        persist-credentials: false
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.x'
+    - name: Install uv
+      run: |
+        python3 -m pip install --upgrade pip
+        python3 -m pip install uv==0.10.6 --user
+    - name: Install package and dev dependencies
+      run: uv pip install --system -e ".[dev]"
+    - name: Run tests
+      run: pytest -v
+
+  build:
+    name: Build distribution
+    needs:
+    - test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v6
+      with:
+        persist-credentials: false
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.x'
+    - name: Install build package
+      run: |
+        python3 -m pip install --upgrade pip
+        python3 -m pip install uv==0.10.6 --user
+    - name: Build
+      run: |
+        uv version ${{ github.ref_name }}
+        uv build
+    - name: Store the distribution
+      uses: actions/upload-artifact@v5
+      with:
+        name: python-package-distribution
+        path: dist/
+
+  publish:
+    name: Publish to PyPI
+    needs:
+    - build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/REALwrap
+    permissions:
+      id-token: write
+    steps:
+    - name: Download distribution
+      uses: actions/download-artifact@v6
+      with:
+        name: python-package-distribution
+        path: dist/
+    - name: Publish
+      uses: pypa/gh-action-pypi-publish@release/v1
