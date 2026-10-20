@@ -92,6 +92,29 @@ Run the test suite:
 pytest tests/
 ```
 
+### Manual SMIRKS regression test
+
+[tests/test_smirks_regression.py](tests/test_smirks_regression.py) is a standalone diagnostic script, not
+part of the automated `pytest` suite (it's excluded via `addopts` in `pyproject.toml`). For every `FOUND` row
+in one or more `realwrap-fetch`-produced processed CSVs, it looks up the SMIRKS for that row's
+`reaction_name`, desalts the reactant SMILES, applies the reaction with RDKit, and checks the result against
+the row's `target_smiles`/`found_smiles`. It then reports per-reaction-type and grand-summary pass/fail
+statistics, so it's useful for sanity-checking that `prepare_syndirella_input.py`'s SMIRKS mappings still
+reproduce real REAL space chemistry after a change.
+
+To run it:
+
+1. Produce a processed CSV with `realwrap-fetch` (or reuse an existing one from a prior run).
+2. Edit the `processed_files` list in `test_smirks_regression.py`'s `main()` to point at your CSV path(s) -
+   it ships with placeholder paths from the original CAR container.
+3. Run it directly:
+
+   ```bash
+   python tests/test_smirks_regression.py
+   ```
+
+It exits non-zero if the 2-component pass rate drops below 50%.
+
 ## Releasing
 
 Tests run automatically on every push/PR to `main` and `staging` (see
