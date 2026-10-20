@@ -10,7 +10,7 @@ package so it can be used without running the full CAR application.
 ## Installation
 
 ```bash
-pip install REALwrap
+pip install xchem-REALwrap
 ```
 
 Until the first PyPI release is published, install directly from GitHub:
